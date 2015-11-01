@@ -1,0 +1,34 @@
+{
+  "name": "demo-chat-server-with-push-notification",
+  "version": "0.0.1",
+  "description": "A Chat Server (and web client) that supports push notifications",
+  "main": "index-runner.js",
+  "scripts": {
+    "test": "mocha --compilers coffee:coffee-script/register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shihabahmed/demo-chat-server-with-push-notification.git"
+  },
+  "author": "Sayem Shafayet <ishafayet@gmail.com> (http://ishafayet.me/), Shihab Ahmed <shihab.bhuiyan@live.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shihabahmed/demo-chat-server-with-push-notification/issues"
+  },
+  "dependencies": {
+      "coffee-script": "^1.10.0",
+      "en-coffee": "^0.0.5",
+      "en-copolymer": "^0.0.6",
+      "en-stylus": "^0.0.5",
+      "evolvenode": "^0.0.8",
+      "ncp": "^1.0.1",
+      "rimraf": "^2.2.8",
+      "chokidar":"1.0.1"
+  },
+  "devDependencies": {
+      "chai": "^3.3.0",
+      "mocha": "^2.3.3"
+  },
+  "homepage": "https://github.com/shihabahmed/demo-chat-server-with-push-notification",
+  "private": true
+}

@@ -1,0 +1,33 @@
+!doctype html
+
+html
+
+  head
+
+    meta charset="utf-8"
+
+    title | Demo Chat Client
+
+    # viewport, needed for responsiveness
+    meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"
+
+    # styles applied to the root document
+    link rel="stylesheet" type="text/stylus" href="assets/stylus/dom-root.stylus"
+
+    # configuration
+    script type="text/coffeescript" `
+      window.__app = {} unless window.__app
+      __app.version = '0.0.1'
+      __app.serverVersion = '0.0.1'
+      __app.masterApiVersion = '1'
+      __app.serverHost = 'http://127.0.0.1:8845'
+    `
+    # library code
+    script type="text/coffeescript" src="assets/coffee/lib.coffee"
+
+    # initiation script
+    script type="text/coffeescript" src="assets/coffee/init.coffee"
+
+  body
+
+    div | Hello There
