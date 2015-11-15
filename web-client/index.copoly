@@ -29,6 +29,9 @@ html
       __app.serverHost = 'http://127.0.0.1:8845'
     `
 
+    # third-party js libraries
+    script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"
+
     # library code
     script type="text/coffeescript" src="assets/coffee/lib.coffee"
 
@@ -40,16 +43,14 @@ html
     div.wrapper
       div.pick-alias
         label | Pick an alias
-        input id="alias" type="text"
-        button id="join" | Join
+        input.alias type="text"
+        button.join | Join
 
       div.chat-window
         select.user
 
         input.message type="text"
         button.send-message | Send
-
-        input.send-image type="file"
 
         hr
         div.content

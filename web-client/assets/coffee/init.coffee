@@ -8,13 +8,3 @@ lib.utils.callWhenReady ->
 
   console.log 'App is running'
 
-  host = window.document.location.host.replace /:.*/, ''
-  socket = new WebSocket 'ws://' + host + ':8080'
-
-  ##
-  ## Socket events.
-  ##
-  socket.onmessage = (event)->
-    data = JSON.parse event.data
-    console.log data.message
-

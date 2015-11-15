@@ -15,8 +15,8 @@ wss.on 'connection', (client)->
     message: 'Welcome...'
   }
 
-  client.on 'message', (event)->
+  client.on 'message', (obj)->
     # do something when message arrives
 
   client.on 'close', ()->
-    # do something when message arrives
+    # do something when client leaves
