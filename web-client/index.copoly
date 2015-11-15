@@ -14,6 +14,12 @@ html
     # styles applied to the root document
     link rel="stylesheet" type="text/stylus" href="assets/stylus/dom-root.stylus"
 
+    # common styles
+    link rel="stylesheet" type="text/stylus" href="assets/stylus/common.stylus"
+
+    # custom styles
+    link rel="stylesheet" type="text/stylus" href="assets/stylus/custom.stylus"
+
     # configuration
     script type="text/coffeescript" `
       window.__app = {} unless window.__app
@@ -30,4 +36,10 @@ html
 
   body
 
-    div | Hello There
+    div.wrapper
+      div.pick-alias
+        label | Pick an alias
+        input id="alias" type="text"
+        button id="join" | Join
+
+      div.chat-window

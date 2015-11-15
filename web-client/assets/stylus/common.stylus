@@ -1,0 +1,12 @@
+// ===============================
+// Define common styles here
+// ===============================
+
+body
+  font-family 'consolas'
+  font-size 13px
+  line-height 22px
+
+.wrapper
+  width 800px
+  margin 50px auto

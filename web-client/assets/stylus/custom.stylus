@@ -1,0 +1,8 @@
+
+.pick-alias
+  width 400px
+  margin 0 auto
+  text-align center
+
+.chat-window
+  display none
