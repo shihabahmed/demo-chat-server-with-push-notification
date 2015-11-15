@@ -45,7 +45,12 @@ wss.on 'connection', (client)->
 
 
   client.on 'close', ()->
-    # do something when client leaves
+    for user in Object.keys(users)
+      if users[user] is client
+        delete users[user]
+
+    # Broadcast the updated list of online users
+    wss.broadcast Object.keys(users).join(','), 'online-users'
 
 
 ## Sends message to all the clients currently connected.

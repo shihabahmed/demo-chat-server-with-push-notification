@@ -65,6 +65,8 @@
         type: 'alias'
         name: txtAlias.val()
       }
+    txtAlias.keydown (e)->
+      btnJoin.click() if e.keyCode is 13
 
     btnSendMessage.click ()->
       fn.showMessage content, messageBox.val(), 'me'
@@ -76,5 +78,8 @@
         message: messageBox.val()
       }
       messageBox.focus().val ''
+    
+    messageBox.keydown (e)->
+      btnSendMessage.click() if e.keyCode is 13
 
 ) jQuery
