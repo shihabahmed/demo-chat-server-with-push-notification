@@ -6,13 +6,12 @@ server.listen 8080, ()->
   console.log 'WebSocket opened on port 8080'
 
 
-
 WebSocketServer = require('ws').Server
 wss = new WebSocketServer { server: server }
 users = {}
 
 wss.on 'connection', (client)->
-  client.send {
+  client.send JSON.stringify {
     message: 'Welcome...'
   }
 

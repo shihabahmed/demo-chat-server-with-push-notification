@@ -8,9 +8,8 @@ lib.utils.callWhenReady ->
 
   console.log 'App is running'
 
-  # host = window.document.location.host.replace /:.*/, ''
-  # socket = new WebSocket 'ws://' + host + ':8080'
-  socket = new WebSocket 'ws://localhost:8080'
+  host = window.document.location.host.replace /:.*/, ''
+  socket = new WebSocket 'ws://' + host + ':8080'
 
   ##
   ## Socket events.
