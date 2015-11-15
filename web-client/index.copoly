@@ -38,6 +38,9 @@ html
     # initiation script
     script type="text/coffeescript" src="assets/coffee/init.coffee"
 
+    # custom script
+    script type="text/coffeescript" src="assets/coffee/custom.coffee"
+
   body
 
     div.wrapper

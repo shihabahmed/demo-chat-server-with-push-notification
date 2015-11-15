@@ -1,4 +1,17 @@
 (($)->
+
+  ##
+  ## User defined functions.
+  ##
+  fn = (()->
+    {
+      getOnlineUsers = ()->
+        socket.send JSON.stringify {
+          type: 'online-users'
+        }
+    }
+  )()
+
   $ ()->
     host = window.document.location.host.replace /:.*/, ''
     socket = new WebSocket 'ws://' + host + ':8080'
@@ -8,7 +21,14 @@
     ##
     socket.onmessage = (event)->
       data = JSON.parse event.data
-      console.log data.message
+      if data.type is 'join-error'
+        alert data.message
+      else if data.type is 'join-success'
+        alias = data.name
+        fn.getOnlineUsers()
+        $('.pick-alias').hide()
+        $('.chat-window').show()
+
 
     btnJoin = $ '.join'
     txtAlias = $ '.alias'

@@ -27,8 +27,11 @@ wss.on 'connection', (client)->
         users[data.name] = client
         users[data.name].send JSON.stringify {
           type: 'join-success'
-          message: data.name
+          name: data.name
         }
+        wss.broadcast Object.keys(users).join(','), 'online-users'
+    # else if data.type is 'online-users'
+
 
 
   client.on 'close', ()->
