@@ -1,3 +1,4 @@
+ws = require './user_modules/websocket'
 
 {
   Event
@@ -173,6 +174,8 @@ class Program
     ## start stuff
     fileProvider.start()
     server.start()
+
+    ws.open(8844)
 
     ## Analytic Code
     if ANALYTICS_ENABLED
