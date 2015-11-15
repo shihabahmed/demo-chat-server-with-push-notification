@@ -17,7 +17,9 @@ wss.on 'connection', (client)->
 
   client.on 'message', (obj)->
     data = JSON.parse obj
+
     if data.type is 'alias'
+      data.name = data.name.toLowerCase()
       if users[data.name]
         client.send JSON.stringify {
           type: 'join-error'
@@ -29,8 +31,10 @@ wss.on 'connection', (client)->
           type: 'join-success'
           name: data.name
         }
+
     else if data.type is 'online-users'
       wss.broadcast Object.keys(users).join(','), 'online-users'
+
     else
       users[data.to].send JSON.stringify {
         type: data.type

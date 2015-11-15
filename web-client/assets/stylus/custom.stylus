@@ -6,3 +6,7 @@
 
 .chat-window
   display none
+
+.me
+  color #00f
+

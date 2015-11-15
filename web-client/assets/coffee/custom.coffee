@@ -12,7 +12,7 @@
           }
 
         showMessage: (messageArea, message, from)->
-          messageArea.prepend '<p><strong>' + from + ' <em>[' + new Date().toLocaleString() + ']</em>: </strong> <span>' + message + '</span></p>'
+          messageArea.prepend "<p class=#{from}><strong>#{from} <em>[#{new Date().toLocaleString()}]</em>: </strong> <span>#{message}</span></p>"
       }
     )()
 
@@ -28,20 +28,27 @@
     ##
     socket.onmessage = (event)->
       data = JSON.parse event.data
+
       if data.type is 'join-error'
         alert data.message
+
       else if data.type is 'join-success'
         alias = data.name
         fn.getOnlineUsers(socket)
         $('.pick-alias').hide()
         $('.chat-window').show()
+
       else if data.type is 'online-users'
         users = data.message.split ','
         userSelect.html ''
         for user in users
           userSelect.append '<option value="' + user + '">' + user + '</option>' if user != alias
+
       else if data.type is 'text'
-        fn.addMessage content, data.message, data.from
+        console.log data
+        fn.showMessage content, data.message, data.from
+
+
 
     btnJoin = $ '.join'
     txtAlias = $ '.alias'
@@ -60,6 +67,8 @@
       }
 
     btnSendMessage.click ()->
+      fn.showMessage content, messageBox.val(), 'me'
+
       socket.send JSON.stringify {
         type: 'text'
         to: userSelect.val()
