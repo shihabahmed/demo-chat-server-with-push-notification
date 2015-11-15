@@ -28,6 +28,10 @@ html
       __app.masterApiVersion = '1'
       __app.serverHost = 'http://127.0.0.1:8845'
     `
+
+    # third-party js libraries
+    script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"
+
     # library code
     script type="text/coffeescript" src="assets/coffee/lib.coffee"
 
@@ -43,3 +47,12 @@ html
         button id="join" | Join
 
       div.chat-window
+        select.user
+
+        input.message type="text"
+        button.send-message | Send
+
+        input.send-image type="file"
+
+        hr
+        div.content
