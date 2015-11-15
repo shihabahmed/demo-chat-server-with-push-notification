@@ -21,7 +21,7 @@ wss.on 'connection', (client)->
       if users[data.name]
         client.send JSON.stringify {
           type: 'join-error'
-          message: "#{data.alias} is not available!"
+          message: "#{data.name} is not available!"
         }
       else
         users[data.name] = client
