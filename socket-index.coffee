@@ -16,7 +16,29 @@ wss.on 'connection', (client)->
   }
 
   client.on 'message', (obj)->
-    # do something when message arrives
+    data = JSON.parse obj
+    if data.type is 'alias'
+      if users[data.name]
+        client.send JSON.stringify {
+          type: 'join-error'
+          message: "#{data.alias} is not available!"
+        }
+      else
+        users[data.name] = client
+        users[data.name].send JSON.stringify {
+          type: 'join-success'
+          message: data.name
+        }
+
 
   client.on 'close', ()->
     # do something when client leaves
+
+
+## Sends message to all the clients currently connected.
+wss.broadcast = (data, type)->
+  wss.clients.forEach each = (client)->
+    client.send JSON.stringify {
+      type: type
+      message: data
+    }
