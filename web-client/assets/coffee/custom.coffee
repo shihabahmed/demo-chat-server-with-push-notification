@@ -7,7 +7,7 @@
     fn = (()->
       {
         getOnlineUsers: (socket)->
-          socket.send JSON.stringify {
+          socket.sendData {
             type: 'online-users'
           }
 
@@ -27,7 +27,7 @@
     ## Socket events.
     ##
     socket.onmessage = (event)->
-      data = JSON.parse event.data
+      data = lib.utils.getData event
 
       if data.type is 'join-error'
         alert data.message
@@ -42,7 +42,7 @@
         users = data.message.split ','
         userSelect.html ''
         for user in users
-          userSelect.append '<option value="' + user + '">' + user + '</option>' if user != alias
+          userSelect.append "<option value='#{user}'>#{user}</option>" if user != alias
 
       else if data.type is 'text'
         console.log data
@@ -61,17 +61,18 @@
     ## Binding events to html elements
     ##
     btnJoin.click ()->
-      socket.send JSON.stringify {
+      socket.sendData {
         type: 'alias'
         name: txtAlias.val()
       }
+
     txtAlias.keydown (e)->
       btnJoin.click() if e.keyCode is 13
 
     btnSendMessage.click ()->
       fn.showMessage content, messageBox.val(), 'me'
 
-      socket.send JSON.stringify {
+      socket.sendData {
         type: 'text'
         to: userSelect.val()
         from: alias

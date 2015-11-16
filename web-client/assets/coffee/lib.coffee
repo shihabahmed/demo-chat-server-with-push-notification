@@ -44,7 +44,12 @@ window.__app.lib.utils = {
     # https://plainjs.com/javascript/ajax/making-cors-ajax-get-requests-54/
     # http://stackoverflow.com/questions/5584923/a-cors-post-request-works-from-plain-javascript-but-why-not-with-jquery
 
+  getData: (serverEvent)->
+    JSON.parse serverEvent.data
 
 }
 
+
+WebSocket::sendData = (obj)->
+  @.send JSON.stringify obj
 
