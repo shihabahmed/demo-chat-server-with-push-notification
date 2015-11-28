@@ -40,7 +40,7 @@ window.__app.lib.utils = {
 
   initServiceWorker: ->
     if 'serviceWorker' of navigator
-      navigator.serviceWorker.register('/service-worker.coffee')
+      navigator.serviceWorker.register('/service-worker.coffee.js')
         .catch (err)->
           console.log err
     else

@@ -8,3 +8,5 @@ lib.utils.callWhenReady ->
 
   console.log 'App is running'
 
+  lib.utils.initServiceWorker()
+

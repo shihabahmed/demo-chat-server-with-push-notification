@@ -16,3 +16,8 @@ this.addEventListener 'install', (event)->
   this.skipWaiting()
   event.waitUntil caches.open(CACHE_NAME).then (cache)->
     cache.addAll URLS
+
+this.addEventListener 'fetch', (event)->
+  event.respondWith caches.match(event.request).then (response)->
+    if response
+      return response
