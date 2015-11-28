@@ -41,6 +41,11 @@ window.__app.lib.utils = {
   initServiceWorker: ->
     if 'serviceWorker' of navigator
       navigator.serviceWorker.register('/service-worker.coffee.js')
+        .then (registration)->
+          registration.pushManager.subscribe { userVisibleOnly: true }
+            .then (pushSubscription)->
+              console.log pushSubscription
+            , (err)-> console.log err
         .catch (err)->
           console.log err
     else
