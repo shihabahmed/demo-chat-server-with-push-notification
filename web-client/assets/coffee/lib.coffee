@@ -38,6 +38,14 @@ window.__app.lib.utils = {
     window.addEventListener 'load', fn  
     # window.addEventListener 'DOMContentLoaded', fn
 
+  initServiceWorker: ->
+    if 'serviceWorker' of navigator
+      navigator.serviceWorker.register('/service-worker.coffee')
+        .catch (err)->
+          console.log err
+    else
+      console.log 'Service Worker is not available.'
+
   doCrossDomainRequest: ->
     # TODO
     # https://plainjs.com/javascript/ajax/send-ajax-get-and-post-requests-47/
