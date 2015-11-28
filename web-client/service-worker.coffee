@@ -18,6 +18,24 @@ this.addEventListener 'install', (event)->
     cache.addAll URLS
 
 this.addEventListener 'fetch', (event)->
+  # Checking cache for the requested resource
   event.respondWith caches.match(event.request).then (response)->
+    # Serve resource from cache if available
     if response
+      refreshContent event.request, 2000
       return response
+
+    # If requested resource is not available from cache
+    # request online for content immediately
+    refreshContent event.request, 0
+
+
+# Update caches with fresh content after a given milliseconds
+refreshContent = (request, ms)->
+  setTimeout ->
+    fetch(request).then (response)->
+      caches.open(CACHE_NAME).then (cache)->
+        cache.put request, response
+
+    response.clone()
+  , ms
