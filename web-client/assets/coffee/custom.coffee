@@ -13,6 +13,9 @@
 
         showMessage: (messageArea, message, from)->
           messageArea.prepend "<p class=#{from}><strong>#{from} <em>[#{new Date().toLocaleString()}]</em>: </strong> <span>#{message}</span></p>"
+
+          if lib.utils.hasFocus() is false
+            lib.utils.showNotification from, message
       }
     )()
 
@@ -55,7 +58,6 @@
             lib.utils.showNotification 'User Left', "#{user} just left the chat room."
 
       else if data.type is 'text'
-        console.log data
         fn.showMessage content, data.message, data.from
 
 

@@ -13,6 +13,9 @@ window.__app.lib = {}
 
 window.__app.lib.utils = {
 
+  hasFocus: ->
+    document.hasFocus()
+
   delay: (ms, fn)->
     setTimeout fn, ms
 
@@ -57,6 +60,7 @@ window.__app.lib.utils = {
         notificationOption = {
           body: message
           tag: 'new-notification'
+          icon: '../favicon.ico'
         }
         if registration.showNotification
           registration.showNotification title, notificationOption
