@@ -51,6 +51,20 @@ window.__app.lib.utils = {
     else
       console.log 'Service Worker is not available.'
 
+  showNotification: (title, message)->
+    if 'serviceWorker' of navigator
+      navigator.serviceWorker.getRegistration().then (registration)->
+        notificationOption = {
+          body: message
+          tag: 'new-notification'
+        }
+        if registration.showNotification
+          registration.showNotification title, notificationOption
+        else
+          new Notification title, notificationOption
+    else
+      console.log 'Service worker is not available.'
+
   doCrossDomainRequest: ->
     # TODO
     # https://plainjs.com/javascript/ajax/send-ajax-get-and-post-requests-47/
