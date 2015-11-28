@@ -39,10 +39,20 @@
         $('.chat-window').show()
 
       else if data.type is 'online-users'
+        onlineUsers = userSelect.data 'users'
         users = data.message.split ','
         userSelect.html ''
+        userSelect.data 'users', users
         for user in users
           userSelect.append "<option value='#{user}'>#{user}</option>" if user != alias
+
+        if onlineUsers != undefined and onlineUsers != null and onlineUsers.length > 0
+          if users.length > onlineUsers.length
+            user = users.diff onlineUsers
+            lib.utils.showNotification 'User Joined', "#{user} just joined the chat room."
+          else
+            user = onlineUsers.diff users
+            lib.utils.showNotification 'User Left', "#{user} just left the chat room."
 
       else if data.type is 'text'
         console.log data

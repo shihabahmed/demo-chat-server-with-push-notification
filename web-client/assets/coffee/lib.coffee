@@ -80,3 +80,5 @@ window.__app.lib.utils = {
 WebSocket::sendData = (obj)->
   @.send JSON.stringify obj
 
+Array::diff = (arr)->
+  @.filter (item)-> arr.indexOf(item) < 0
