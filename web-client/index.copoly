@@ -28,7 +28,7 @@ html
       __app.version = '0.0.1'
       __app.serverVersion = '0.0.1'
       __app.masterApiVersion = '1'
-      __app.serverHost = 'http://127.0.0.1:8845'
+      __app.serverHost = 'http://127.0.0.1:8844'
     `
 
     # third-party js libraries

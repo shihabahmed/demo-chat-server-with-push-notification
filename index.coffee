@@ -1,226 +1,232 @@
-{
-  Event
-  EventEmitter
-  web: {
-    WebServer
-    extra: {
-      UrlParser
-      BodyParser
-    }
-  }
-  file: {
-    FileProvider
-    CachedFileProvider
-  }
-  fileServer: {
-    FileServer
-  }
-} = require 'evolvenode'
 
-{CopolymerCompiler} = require 'en-copolymer'
+fslib = require 'fs'
 
-{CoffeescriptCompiler, CoffeescriptTagProcessor} = require 'en-coffee'
+pathlib = require 'path'
 
-{StylusTagProcessor, StylusCompiler} = require 'en-stylus'
+httplib = require 'http'
 
-###
-  @options
-###
+httpslib = require 'https'
 
-APP_NAME = 'DemoChatClientContentServer'
+urllib = require 'url'
 
-FORCE_VIRTUAL_MODE = true
+opt = null
 
-PREFER_VIRTUAL_MODE = true
+directoryDigest = null
 
-if FORCE_VIRTUAL_MODE
+LOG_LEVEL = {
+  'log'
+  'alert'
+  'info'
+  'warning'
+  'error'
+}
 
-  __IS_IN_VIRTUAL_MODE = true
+writeStdout = (level, args...)->
+  console.log.apply console, args
 
-else if (require 'os').platform() in ['darwin', 'linux']
+## TODO: loads of type checking
+validateOptions = (opt)->
 
-  __IS_IN_VIRTUAL_MODE = PREFER_VIRTUAL_MODE
+  unless opt and typeof opt is 'object'
+    throw new Error "Expected opt to be a non null <object>"
 
-else
+  unless 'name' of opt
+    opt.name = 'untitled-server'
 
-  __IS_IN_VIRTUAL_MODE = false
+  if 'http' of opt or 'https' of opt
+    unless 'source' of opt
+      throw new Error "Missing opt.source. Can not create an http/https server without a directory to serve."
 
-SOURCE_DIR = './web-client'
+  if 'source' of opt
+    unless 'dirList' of opt.source
+      throw new Error "Missing opt.source.dirList"
+    if opt.source.dirList.length is 0
+      throw new Error "opt.source.dirList can not be empty"
 
-if __IS_IN_VIRTUAL_MODE
+  ## TODO - validate other options
 
-  CLIENT_DIR = SOURCE_DIR
+  return opt
 
-else
 
-  CLIENT_DIR = './web-client-volatile'
 
-WATCH_DEPTH = 12
+buildDirectoryDigest = (dirList)->
 
-ANALYTICS_ENABLED = false
+  directoryDigest = {}
 
-VERBOSE_MODE = false
+  buildDirectoryDigestRecursive = (dir, basedir)->
 
-ANALYTICS_DELAY_THRESHHOLD = 5000
+    list = fslib.readdirSync dir
+    for basename in list
+      qualifiedPath = pathlib.join dir, basename
 
-###
-  @class Program
-###
-
-class Program
-
-  @Start: ()->
-
-    ## The http/https server
-    server = new WebServer {port: 8844}
-
-    ## UrlParser plugin
-    (new UrlParser).linkTo server
-
-    ## BodyParser plugin
-    (new BodyParser).linkTo server
-    
-    ## FileProvider
-    if __IS_IN_VIRTUAL_MODE
-      ## reduces disk i/o a lot
-      fileProvider = new CachedFileProvider {rootDir: CLIENT_DIR, depth: WATCH_DEPTH}
-    else
-      fileProvider = new FileProvider {rootDir: CLIENT_DIR, depth: WATCH_DEPTH}
-
-    ## Various watcher for changes in file
-    fileWatcherList = [
-      new CopolymerCompiler
-      new CoffeescriptCompiler
-      new StylusCompiler
-      new CoffeescriptTagProcessor
-      new StylusTagProcessor
-    ]
-    fileWatcher.linkTo fileProvider for fileWatcher in fileWatcherList
-
-    fileWatcher.verboseMode = VERBOSE_MODE for fileWatcher in fileWatcherList
-
-    ## FileServer is a plugin for WebServer
-    fileServer = new FileServer
-
-    ## we are going to handle 404s manually
-    fileServer.treat404AsError = false
-
-    fileServer.addEventHandler 'error', (e)->
-      console.log 'some err', e
-
-    ## This plugin enables custom urls
-    server.addEventHandler 'request', 'late', (e)->
-      return e.next() if e.isResponseSent
-      return e.next() unless fileProvider
-      if not fileProvider.isReady
-        console.log 'server is preparing'
-        e.respond 500, {'content-type':'text/html'}, "<!doctype html>
-        <html><head><meta http-equiv=\"refresh\" content=\"3\"></head><body>
-        #{APP_NAME} server has just restarted and preparing to serve your request.
-        This page should automatically refresh in 3 seconds. If it takes longer, please refresh manually.</body></html>"
-        e.next()
+      stats = fslib.lstatSync qualifiedPath
+      if not stats.isSymbolicLink() and stats.isDirectory()
+        buildDirectoryDigestRecursive qualifiedPath, basedir
       else
-        uri = e.url.pathname
-        fileProvider.getResourceInfo uri, (err, stats)=>
-          unless err
-            throw new Error 'Something is really wrong'
-          if (require 'path').extname(uri) is ''
-            e.reset()
-            e.request.url = e.request.url.replace e.url.pathname, '/index.html'
-            e.url.pathname = '/index.html'
-            return e.next()
-          else
-            return e.next()
+        ## TODO: exclusion filtering
+        if opt.source.verify
+          fslib.accessSync qualifiedPath, fslib.R_OK
+        stats.qualifiedPath = qualifiedPath
+        pathname = '\\' + pathlib.relative basedir, qualifiedPath
+        directoryDigest[pathname] = stats
 
-    ## Finally send a 404 message if content was really not found
-    server.addEventHandler 'request', 'late', (e)->
-      return e.next() if e.isResponseSent
-      e.respond 404, '404 - Content not found'
-      e.stopPropagation().next()
+  reverseDirectoryList = ((_ for _ in dirList).reverse())
+  for dir in reverseDirectoryList
+    buildDirectoryDigestRecursive dir, dir
 
-    ## for logging purposes
-    server.addEventHandler 'start', (e)-> 
-      console.log "(content-server)> started on port #{e.origin.port}"
+  return directoryDigest
 
-    ## for logging purposes
-    server.addEventHandler 'request', (e)->
-      return e.next() if e.url.pathname isnt '/'
-      console.log "(content-server)> request from #{e.request.socket.remoteAddress}"
-      # console.log "#{e.request.url} from #{e.request.socket.remoteAddress}"
-      # console.log e.request.headers
-      return e.next()
+inferMimeOfDigestedFiles = ->
+  unrecognizedExtList = []
+  for pathname, stats of directoryDigest
+    qualifiedPath = stats.qualifiedPath
+    ext = pathlib.extname qualifiedPath
+    if ext of opt.mime.map
+      stats.mime = opt.mime.map[ext]
+    else
+      stats.mime = opt.mime.map.default
+      unrecognizedExtList.push ext unless ext in unrecognizedExtList
+  if unrecognizedExtList.length > 0
+    writeStdout LOG_LEVEL.warning, 'mime for these extensions could not be infered', unrecognizedExtList
 
-    ## for logging purposes
-    server.addEventHandler 'respond', (e)->
-      status = e.storedData.originalRequest.response.statusCode
-      if status isnt 200
-        console.log status, e.storedData.originalRequest.url.pathname
+inferEncodingOfDigestedFiles = ->
+  
+  for pathname, stats of directoryDigest
+    qualifiedPath = stats.qualifiedPath
+    ## TODO rule matching
+    stats.encoding = opt.encoding.default
 
-    ## for logging purposes
-    fileServer.addEventHandler 'start', =>
-      console.log '(file-server)> started'
+getFileAsStream = (pathname, cbfn)->
+  stats = directoryDigest[pathname]
+  stream = fslib.createReadStream stats.qualifiedPath
+  return cbfn null, stream
+
+
+httpHandler = (request, response) ->
+
+  url = urllib.parse request.url
+
+  if '/' is url.pathname.charAt (url.pathname.length-1)
+    if opt.remapUrl and opt.remapUrl.slashEnding and opt.remapUrl.slashEnding.append
+      newPathname = url.pathname + opt.remapUrl.slashEnding.append
+      url.path = url.path.replace url.pathname, newPathname
+      url.href = url.href.replace url.pathname, newPathname
+      url.pathname = newPathname
+
+  if url.pathname is '' or url.pathname is '/'
+    url.pathname = '/index.copoly'
+
+  url.pathname = url.pathname.replace(new RegExp('/', 'g'), '\\')
+  unless url.pathname of directoryDigest
+    if opt.errorHandling and opt.errorHandling['404'].customResponse
+      ## TODO
+    else
+      response.writeHead 404, 'Content-Type': 'text/plain'
+      response.end "The requested URL \"#{url.href}\" can not be resolved to a content"
+  else
+    getFileAsStream url.pathname, (err, stream)->
+      if err
+        throw err
+      stats = directoryDigest[url.pathname]
+      
+      response.writeHead 200, 'Content-Type': stats.mime
+      stream.pipe response
+  return
+
+createHttpsServer = ->
+
+  ca = []
+  chain = fslib.readFileSync opt.https.ca, 'utf8'
+  chain = chain.split '\n'
+  cert = []
+  for line in chain when line.length isnt 0
+    cert.push line
+    if line.match /-END CERTIFICATE-/
+      ca.push cert.join "\n"
+      cert = []
+
+
+  hskey = fslib.readFileSync opt.https.pkey
+  hscert = fslib.readFileSync opt.https.cert
+  options = 
+    ca: ca
+    key: hskey
+    cert: hscert
+  sServer = httpslib.createServer options, httpHandler
+  writeStdout LOG_LEVEL.log, 'https server created'
+  if opt.https.hostname is null
+    sServer.listen opt.https.port
+    writeStdout LOG_LEVEL.log, "https server listen to port #{opt.https.port} for any hostname."
+    writeStdout LOG_LEVEL.log, "can be accessed using https://127.0.0.1:#{opt.https.port}/"
+  else
+    sServer.listen opt.https.port, opt.http.hostname
+    writeStdout LOG_LEVEL.log, "https server listen to port #{opt.https.port} for any #{opt.https.hostname}."
+    writeStdout LOG_LEVEL.log, "can be accessed using #{opt.https.hostname}:#{opt.https.port}/"
+
+createHttpServer = ->
+
+  server = httplib.createServer httpHandler
+  writeStdout LOG_LEVEL.log, 'http server created'
+
+  if opt.http.hostname is null
+    server.listen opt.http.port
+    writeStdout LOG_LEVEL.log, "http server listen to port #{opt.http.port} for any hostname."
+    writeStdout LOG_LEVEL.log, "can be accessed using http://127.0.0.1:#{opt.http.port}/"
+  else
+    server.listen opt.http.port, opt.http.hostname
+    writeStdout LOG_LEVEL.log, "http server listen to port #{opt.http.port} for any #{opt.http.hostname}."
+    writeStdout LOG_LEVEL.log, "can be accessed using #{opt.http.hostname}:#{opt.http.port}/"
+
+
+@createServer = (_opt)->
+  
+  opt = validateOptions _opt
+
+  writeStdout LOG_LEVEL.log, 'options accepted'
+
+  if 'source' of opt
+
+    buildDirectoryDigest opt.source.dirList
+
+    writeStdout LOG_LEVEL.log, 'directory digest created. Digest size is', (2*(JSON.stringify directoryDigest).length), 'bytes approximately'
+
+    inferMimeOfDigestedFiles()
+
+    inferEncodingOfDigestedFiles()
+
+    writeStdout LOG_LEVEL.log, 'directory digest updated with mime and encoding info. Digest size is', (2*(JSON.stringify directoryDigest).length), 'bytes approximately'
+
+  if 'http' of opt and opt.http.enabled
+
+    createHttpServer()
+
+  if 'https' of opt and opt.https.enabled
+
+    createHttpsServer()
+
     
-    ## for logging purposes
-    fileProvider.addEventHandler 'ready', =>
-      console.log '(file-provider)> started'
-
-    ## connect fileServer to server only when fileProvider is ready
-    fileProvider.addEventHandler 'ready', =>
-      fileServer.setFileProvider fileProvider
-      fileServer.linkTo server
-
-    ## start stuff
-    fileProvider.start()
-    server.start()
-
-    ## Analytic Code
-    if ANALYTICS_ENABLED
-      lastAnalyticChangesFound = null
-      wasCleared = false
-      setInterval =>
-        if fileProvider.wasAnalyticUpdated()
-          if lastAnalyticChangesFound is null
-            lastAnalyticChangesFound = new Date()
-          else
-            if (new Date).getTime() - lastAnalyticChangesFound.getTime() > ANALYTICS_DELAY_THRESHHOLD
-              console.log fileProvider.printAnalyticInformation()
-              lastAnalyticChangesFound = null
-              wasCleared = false
-        else
-          if lastAnalyticChangesFound isnt null
-            if (new Date).getTime() - lastAnalyticChangesFound.getTime() > ANALYTICS_DELAY_THRESHHOLD
-              console.log fileProvider.printAnalyticInformation()
-              lastAnalyticChangesFound = null
-              wasCleared = false
-          else
-            unless wasCleared
-              console.log '\nWaiting for Analytic changes\n'
-            wasCleared = true
-      , 100
 
 ###
   @run
 ###
 
-rimraf = (require 'rimraf')
-ncp = (require 'ncp').ncp
-
-if __IS_IN_VIRTUAL_MODE
-  console.log '(program)> virtual mode enabled. disk I/O will be virtualized.'
-  console.log '(program)> start'
-  Program.Start()
-else
-  console.log '(program)> removing leftover temporary directory'
-  rimraf CLIENT_DIR, (err)->
-    throw err if err
-
-    console.log '(program)> cloning source to temporary directory'
-    ncp SOURCE_DIR, CLIENT_DIR, {}, (err)->
-      throw err if err
-
-      console.log '(program)> start'
-      Program.Start()
-
-return
-
-
+this.createServer {
+  http:
+    hostname: 'localhost'
+    port: 8844
+    enabled: true
+  source:
+    dirList: [
+      './web-client'
+    ]
+  mime:
+    map:
+      '.coffee': 'text/coffeescript'
+      '.stylus': 'text/css'
+      '.ico': 'image/ico'
+      '.copoly': 'text/copoly'
+      '.json': 'text/json'
+      '.js': 'text/javascript'
+  encoding:
+    default: {}
+}
