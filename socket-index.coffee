@@ -1,9 +1,17 @@
-http = require 'http'
+https = require 'https'
 
-server = http.createServer()
+ssl = require './ssl-certificate.coffee'
 
-server.listen 8080, ()->
-  console.log 'WebSocket opened on port 8080'
+options = ssl.generateCertificate {
+  ca: 'certificates/beta_bdemr_xyz.ca-bundle'
+  key: 'certificates/beta_bdemr_xyz.key'
+  cert: 'certificates/beta_bdemr_xyz.crt'
+}
+
+server = https.createServer(options)
+
+server.listen 7443, ()->
+  console.log 'WebSocket opened on port 7443'
 
 
 WebSocketServer = require('ws').Server

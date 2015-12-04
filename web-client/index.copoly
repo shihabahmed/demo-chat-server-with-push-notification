@@ -28,11 +28,11 @@ html
       __app.version = '0.0.1'
       __app.serverVersion = '0.0.1'
       __app.masterApiVersion = '1'
-      __app.serverHost = 'http://127.0.0.1:8844'
+      __app.serverHost = 'https://127.0.0.1:8443'
     `
 
     # third-party js libraries
-    script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"
+    script src="assets/lib/jquery.min.js"
 
     # library code
     script type="text/coffeescript" src="assets/coffee/lib.coffee"

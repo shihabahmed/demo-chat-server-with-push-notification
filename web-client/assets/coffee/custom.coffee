@@ -23,7 +23,7 @@
     ## Connecting to the chat server.
     ##
     host = window.document.location.host.replace /:.*/, ''
-    socket = new WebSocket 'ws://' + host + ':8080'
+    socket = new WebSocket 'wss://' + host + ':7443'
     alias = ''
 
     ##

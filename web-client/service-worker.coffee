@@ -7,6 +7,7 @@ URLS = [
   '/assets/stylus/dom-root.stylus.css'
   '/assets/stylus/common.stylus.css'
   '/assets/stylus/custom.stylus.css'
+  '/assets/lib/jquery.min.js'
   '/assets/coffee/lib.coffee.js'
   '/assets/coffee/init.coffee.js'
   '/assets/coffee/custom.coffee.js'
