@@ -52,10 +52,12 @@
         if onlineUsers != undefined and onlineUsers != null and onlineUsers.length > 0
           if users.length > onlineUsers.length
             user = users.diff onlineUsers
-            lib.utils.showNotification 'User Joined', "#{user} just joined the chat room."
+            if user.length > 0
+              lib.utils.showNotification 'User Joined', "#{user.join(',')} just joined the chat room."
           else
             user = onlineUsers.diff users
-            lib.utils.showNotification 'User Left', "#{user} just left the chat room."
+            if user.length > 0
+              lib.utils.showNotification 'User Left', "#{user.join(',')} just left the chat room."
 
       else if data.type is 'text'
         fn.showMessage content, data.message, data.from
