@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "chai": "^3.3.0",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.4"
   },
   "homepage": "https://github.com/shihabahmed/demo-chat-server-with-push-notification",
   "private": true

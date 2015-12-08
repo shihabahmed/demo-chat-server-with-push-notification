@@ -1,13 +1,20 @@
 
 expect = require('chai').expect
 
-describe 'Scenarios', ->
+io = require 'socket.io-client'
 
-  describe 'Scenario 1', ->
+socket = io.connect 'wss://localhost:7443'
 
-    it 'test', ->
+describe 'Socket Test', ->
+  describe 'Trying to connect', ->
+    it 'should be able to connect to the chat server', ->
+      socket.on 'connect', (done)->
+        done()
 
-      expect(true).to.equal.true
+  describe 'Sending message', ->
+    it 'should be able to send messages', ->
+      socket.send 'test message'
 
-
-
+      socket.on 'message', (obj)->
+        data = JSON.parse obj
+        expect(data.message).to.be 'test messages'
