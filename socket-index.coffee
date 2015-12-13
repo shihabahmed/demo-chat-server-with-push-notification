@@ -19,6 +19,7 @@ wss = new WebSocketServer { server: server }
 users = {}
 
 wss.on 'connection', (client)->
+  console.log client
   client.send JSON.stringify {
     message: 'Welcome...'
   }

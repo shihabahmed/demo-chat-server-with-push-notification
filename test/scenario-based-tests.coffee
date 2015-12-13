@@ -3,9 +3,22 @@ expect = require('chai').expect
 
 io = require 'socket.io-client'
 
-socket = io.connect 'wss://localhost:7443'
+socketURL = 'wss://localhost:7443'
+socketOptions = 
+  transports: ['websocket']
+  'force new connection': true
 
-describe 'Socket Test', ->
+socket = {}
+
+
+describe 'Array', ->
+  beforeEach (done) ->
+    socket = io.connect socketURL, socketOptions
+    socket.on 'connect', ()->
+      console.log('connected')
+
+    done()
+
   describe 'Trying to connect', ->
     it 'should be able to connect to the chat server', ->
       socket.on 'connect', (done)->
@@ -17,4 +30,4 @@ describe 'Socket Test', ->
 
       socket.on 'message', (obj)->
         data = JSON.parse obj
-        expect(data.message).to.be 'test messages'
+        expect(data.message).to.be.equal 'test messages'

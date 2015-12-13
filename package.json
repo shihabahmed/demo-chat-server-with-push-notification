@@ -4,7 +4,7 @@
   "description": "A Chat Server (and web client) that supports push notifications",
   "main": "index-runner.js",
   "scripts": {
-    "test": "mocha --compilers coffee:coffee-script/register"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
